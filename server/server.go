@@ -210,36 +210,7 @@ func BookListByAuthorWithName(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-// type errorsResponse struct {
-// 	message string `json:"message"`
-// }
 
-// func userCreate(w http.ResponseWriter, r *http.Request) {
-// 	var u User
-
-// 	if r.Header.Get("Content-Type") != "application/json" {
-// 		err := httpErrors.ParseErrors(httpErrors.NotAllowedImageHeader)
-// 		w.Write([]byte(err.Error()))
-// 		return
-// 	}
-
-// 	err := json.NewDecoder(r.Body).Decode(&u)
-// 	if err != nil {
-// 		w.Write([]byte(httpErrors.
-// 			ParseErrors(httpErrors.BadRequest).
-// 			Error()))
-// 		return
-// 	}
-
-// 	personData, err := json.Marshal(u)
-// 	if err != nil {
-// 		w.Write([]byte(httpErrors.
-// 			ParseErrors(httpErrors.BadRequest).
-// 			Error()))
-// 		return
-// 	}
-// 	w.Write(personData)
-// }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
