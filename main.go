@@ -6,6 +6,11 @@ import (
 )
 
 func main() {
+	
+	srv.Server()
+	
+	
+	
 	// err := godotenv.Load()
 	// if err != nil {
 	// 	log.Fatal("Error loading .env file")
@@ -44,6 +49,6 @@ func main() {
 
 	//authorRepo.GetAuthorWithName("Jack London")
 	// fmt.Println(authorRepo.GetAllAuthorsWithBookInformation())
-	srv.Server()
+	
 
 }
