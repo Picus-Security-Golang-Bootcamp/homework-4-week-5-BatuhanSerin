@@ -1,37 +1,31 @@
 package main
 
 import (
-	"log"
-
-	postgres "github.com/BatuhanSerin/postgresql/common/db"
-	"github.com/BatuhanSerin/postgresql/domain/author"
-	"github.com/BatuhanSerin/postgresql/domain/book"
-
+	srv "github.com/BatuhanSerin/postgresql/server"
 	//bookStruct "github.com/BatuhanSerin/postgresql/domain/book"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
-	db, err := postgres.NewPsqlDB()
-	if err != nil {
-		log.Fatal("Postgres cannot init ", err)
-	}
+	// db, err := postgres.NewPsqlDB()
+	// if err != nil {
+	// 	log.Fatal("Postgres cannot init ", err)
+	// }
 
-	log.Println("Postgres connected")
+	// log.Println("Postgres connected")
 
-	bookRepo := book.NewBookRepository(db)
-	bookRepo.Migrations()
-	bookRepo.InsertData()
+	// bookRepo := book.NewBookRepository(db)
+	// bookRepo.Migrations()
+	// bookRepo.InsertData()
 
 	//fmt.Println(bookRepo.FinAll())
 	//fmt.Println(bookRepo.FindBookById(2))
 	//fmt.Println(bookRepo.FindByAuthorOrBookId(5))
-	//fmt.Println(bookRepo.FindByName("It"))
+	//fmt.Println(bookRepo.FindByName("it"))
 	//fmt.Println(bookRepo.FindByNameWithRawSql("It"))
 	// fmt.Println(bookRepo.GetByID(2))
 
@@ -44,11 +38,12 @@ func main() {
 
 	// Author************
 
-	authorRepo := author.NewAuthorRepository(db)
-	authorRepo.Migrations()
-	authorRepo.InsertData()
+	// authorRepo := author.NewAuthorRepository(db)
+	// authorRepo.Migrations()
+	// authorRepo.InsertData()
 
 	//authorRepo.GetAuthorWithName("Jack London")
 	//authorRepo.GetAllAuthorsWithBookInformation()
+	srv.Server()
 
 }
