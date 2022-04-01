@@ -14,7 +14,7 @@
 
 #### BookList By Name
 
-0.0.0.0:8090/book/<name>
+0.0.0.0:8090/book/"name"
 
 #### Book Before Delete
 
@@ -26,4 +26,4 @@
 
 #### BookList By Author With Name
 
-0.0.0.0:8090/author/<name>
+0.0.0.0:8090/author/"name"
