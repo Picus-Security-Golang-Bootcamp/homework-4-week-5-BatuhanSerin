@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -25,6 +26,14 @@ func NewBookRepository(db *gorm.DB) *BookRepository {
 func (b *BookRepository) FinAll() bookSlice {
 	var books bookSlice
 	b.db.Find(&books)
+	fmt.Println("Books: ")
+	if len(books) > 0 {
+		for _, book := range books {
+			fmt.Println(book.ToString())
+			fmt.Println("=============================")
+		}
+
+	}
 	return books
 }
 
@@ -34,6 +43,13 @@ func (b *BookRepository) FindBookById(id int) bookSlice {
 	strID := strconv.Itoa(id)
 	//b.db.Where("id = ?", strID).Order("id desc , name").Find(&books)
 	b.db.Where(&Book{ID: strID}).Order("id desc , name").Find(&books)
+	fmt.Println("Books: ")
+	if len(books) > 0 {
+		for _, book := range books {
+			fmt.Println(book.ToString())
+			fmt.Println("=============================")
+		}
+	}
 	return books
 }
 
@@ -43,6 +59,13 @@ func (b *BookRepository) FindByAuthorOrBookId(id int) bookSlice {
 	strID := strconv.Itoa(id)
 
 	b.db.Where("id = ?", strID).Or("author_id = ?", strID).Find(&books)
+	fmt.Println("Books: ")
+	if len(books) > 0 {
+		for _, book := range books {
+			fmt.Println(book.ToString())
+			fmt.Println("=============================")
+		}
+	}
 	return books
 
 }
@@ -50,7 +73,15 @@ func (b *BookRepository) FindByAuthorOrBookId(id int) bookSlice {
 //FindByName returns book by its name
 func (b *BookRepository) FindByName(name string) bookSlice {
 	var books bookSlice
-	b.db.Where("name LIKE ? ", "%"+name+"%").Find(&books)
+	Name := strings.Title(strings.ToLower(name))
+	b.db.Where("name LIKE ? ", "%"+Name+"%").Find(&books)
+	fmt.Println("Books: ")
+	if len(books) > 0 {
+		for _, book := range books {
+			fmt.Println(book.ToString())
+			fmt.Println("=============================")
+		}
+	}
 	return books
 }
 
@@ -58,6 +89,15 @@ func (b *BookRepository) FindByName(name string) bookSlice {
 func (b *BookRepository) FindByNameWithRawSql(name string) bookSlice {
 	var books bookSlice
 	b.db.Raw("SELECT * FROM books WHERE name LIKE ? ", "%"+name+"%").Scan(&books)
+
+	fmt.Println("Books: ")
+	if len(books) > 0 {
+		for _, book := range books {
+			fmt.Println(book.ToString())
+			fmt.Println("=============================")
+		}
+	}
+
 	return books
 }
 
@@ -68,6 +108,10 @@ func (b *BookRepository) GetByID(id int) (*Book, error) {
 	strID := strconv.Itoa(id)
 
 	result := b.db.First(&book, strID)
+	fmt.Println("Book: ")
+
+	fmt.Println(book.ToString())
+	fmt.Println("=============================")
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, result.Error
@@ -108,6 +152,7 @@ func (b *BookRepository) DeleteById(id int) error {
 	strID := strconv.Itoa(id)
 	book := Book{ID: strID}
 	result := b.db.Delete(&book)
+
 	if result.Error != nil {
 		return result.Error
 	}

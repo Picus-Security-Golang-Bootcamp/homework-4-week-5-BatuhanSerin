@@ -1,0 +1,90 @@
+// package server
+
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"log"
+// 	"net/http"
+// 	"os"
+// 	"os/signal"
+// 	"time"
+
+// 	author "github.com/BatuhanSerin/postgresql/domain/author"
+// 	"github.com/gorilla/handlers"
+// 	"github.com/gorilla/mux"
+// )
+
+// func ServerRun() {
+// 	r := mux.NewRouter()
+
+// 	handlers.AllowedOrigins([]string{"https://www.example.com"})
+// 	handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+// 	handlers.AllowedMethods([]string{"POST", "GET", "PUT", "PATCH"})
+
+// 	p := r.PathPrefix("/list").Subrouter()
+// 	p.HandleFunc("/", listBook).Methods(http.MethodGet)
+
+// 	srv := &http.Server{
+// 		Addr:         "localhost:8080",
+// 		WriteTimeout: time.Second * 15,
+// 		ReadTimeout:  time.Second * 15,
+// 		IdleTimeout:  time.Second * 60,
+// 		Handler:      r,
+// 	}
+// 	go func() {
+// 		if err := srv.ListenAndServe(); err != nil {
+// 			log.Println(err)
+// 		}
+// 	}()
+
+// 	ShutdownServer(srv, time.Second*10)
+
+// }
+// func listBook(w http.ResponseWriter, r *http.Request) {
+// 	var a author.Author
+
+// 	// if r.Header.Get("Content-Type") != "application/json" {
+// 	// 	err := httpErrors.ParseErrors(httpErrors.NotAllowedImageHeader)
+// 	// 	w.Write([]byte(err.Error()))
+// 	// 	return
+// 	// }
+
+// 	//err := json.NewDecoder(r.Body).Decode(&u)
+// 	// if err != nil {
+// 	// 	w.Write([]byte(httpErrors.
+// 	// 		ParseErrors(httpErrors.BadRequest).
+// 	// 		Error()))
+// 	// 	return
+// 	// }
+
+// 	bookData, _ := json.Marshal(a)
+// 	// if err != nil {
+// 	// 	w.Write([]byte(httpErrors.
+// 	// 		ParseErrors(httpErrors.BadRequest).
+// 	// 		Error()))
+// 	// 	return
+// 	// }
+// 	w.Write(bookData)
+// }
+
+// func ShutdownServer(srv *http.Server, timeout time.Duration) {
+// 	c := make(chan os.Signal, 1)
+// 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+// 	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+// 	signal.Notify(c, os.Interrupt)
+
+// 	// Block until we receive our signal.
+// 	<-c
+
+// 	// Create a deadline to wait for.
+// 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+// 	defer cancel()
+// 	// Doesn't block if no connections, but will otherwise wait
+// 	// until the timeout deadline.
+// 	srv.Shutdown(ctx)
+// 	// Optionally, you could run srv.Shutdown in a goroutine and block on
+// 	// <-ctx.Done() if your application should wait for other services
+// 	// to finalize based on context cancellation.
+// 	log.Println("shutting down")
+// 	os.Exit(0)
+// }
