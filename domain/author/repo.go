@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -20,11 +21,12 @@ func NewAuthorRepository(db *gorm.DB) *AuthorRepository {
 }
 
 //GetAllAuthorsWithBookInformation returns all authors with book information
-func (a *AuthorRepository) GetAllAuthorsWithBookInformation() (authorSlice, error) {
+func (a *AuthorRepository) GetAllAuthorsWithBookInformation() authorSlice {
 	var authors authorSlice
 	result := a.db.Preload("Books").Find(&authors)
 	if result.Error != nil {
-		return nil, result.Error
+		fmt.Println(result.Error)
+		return nil
 	}
 
 	for _, author := range authors {
@@ -37,15 +39,17 @@ func (a *AuthorRepository) GetAllAuthorsWithBookInformation() (authorSlice, erro
 			}
 		}
 	}
-	return authors, nil
+	return authors
 }
 
 //GetAuthorWithName returns author by its name
-func (a *AuthorRepository) GetAuthorWithName(name string) error {
+func (a *AuthorRepository) GetAuthorWithName(name string) *Author {
 	var authors *Author
-	result := a.db.Where(Author{AuthorName: name}).Preload("Books").Find(&authors)
+	Name := strings.Title(strings.ToLower(name))
+	result := a.db.Where(Author{AuthorName: Name}).Preload("Books").Find(&authors)
 	if result.Error != nil {
-		return result.Error
+		fmt.Println(result.Error)
+		return nil
 	}
 
 	fmt.Println(authors.ToString())
@@ -57,7 +61,7 @@ func (a *AuthorRepository) GetAuthorWithName(name string) error {
 		}
 	}
 
-	return nil
+	return authors
 }
 
 //**********************************______________________********************

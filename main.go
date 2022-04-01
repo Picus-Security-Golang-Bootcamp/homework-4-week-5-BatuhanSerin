@@ -27,7 +27,7 @@ func main() {
 	//fmt.Println(bookRepo.FindByAuthorOrBookId(5))
 	//fmt.Println(bookRepo.FindByName("it"))
 	//fmt.Println(bookRepo.FindByNameWithRawSql("It"))
-	// fmt.Println(bookRepo.GetByID(2))
+	//fmt.Println(bookRepo.GetByID(2))
 
 	// NewBook := bookStruct.Book{ID: "4", Name: "The Dice Man", Page: "305", Stock: "14", Cost: "25", StockCode: "7", ISBN: "A125-128-DCD", AuthorID: "7"}
 	// bookRepo.Create(&NewBook)
@@ -43,7 +43,7 @@ func main() {
 	// authorRepo.InsertData()
 
 	//authorRepo.GetAuthorWithName("Jack London")
-	//authorRepo.GetAllAuthorsWithBookInformation()
+	// fmt.Println(authorRepo.GetAllAuthorsWithBookInformation())
 	srv.Server()
 
 }

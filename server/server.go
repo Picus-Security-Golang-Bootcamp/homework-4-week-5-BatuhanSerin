@@ -20,26 +20,38 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var Bookrepo = BookRepo()
+var Authorrepo = AuthorRepo()
+
+//Server runs the server
 func Server() {
+
 	r := mux.NewRouter()
 
 	handlers.AllowedOrigins([]string{"https://www.example.com"})
 	handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
-	handlers.AllowedMethods([]string{"POST", "GET", "PUT", "PATCH"})
+	handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE"})
 
-	//0.0.0.0:8090/products/bb
 	r.Use(loggingMiddleware)
 	r.Use(authenticationMiddleware)
 
-	s := r.PathPrefix("/list").Subrouter()
-	//"/list/{name}/"
-	s.HandleFunc("", BookList)
-	s.HandleFunc("/{id}", BookListById)
-	s.HandleFunc("/id/{id}", BookListByAuthorOrBookId)
-	s.HandleFunc("/{name}", BookListByName)
+	//0.0.0.0:8090/book
+	b := r.PathPrefix("/book").Subrouter()
 
-	p := r.PathPrefix("/user").Subrouter()
-	p.HandleFunc("/", userCreate).Methods(http.MethodPost)
+	b.HandleFunc("", BookList).Methods(http.MethodGet)
+	//0.0.0.0:8090/book/2
+	b.HandleFunc("/{id}", BookListById).Methods(http.MethodGet)
+	//0.0.0.0:8090/book/id/20
+	b.HandleFunc("/id/{id}", BookListByAuthorOrBookId).Methods(http.MethodGet)
+	//0.0.0.0:8090/book/<name>
+	b.HandleFunc("/", BookListByName).Methods(http.MethodGet)
+	b.HandleFunc("/delete/{id}", BookBeforeDelete).Methods(http.MethodDelete)
+
+	//0.0.0.0:8090/author
+	a := r.PathPrefix("/author").Subrouter()
+	a.HandleFunc("", BookListWithAuthors).Methods(http.MethodGet)
+	//0.0.0.0:8090/author/<name>
+	a.HandleFunc("/name", BookListByAuthorWithName).Methods(http.MethodGet)
 
 	srv := &http.Server{
 		Addr:         "localhost:8090",
@@ -58,11 +70,8 @@ func Server() {
 	ShutdownServer(srv, time.Second*10)
 }
 
-// type ApiResponse struct {
-// 	Data interface{} `json:"data"`
-// }
-
 func BookRepo() *book.BookRepository {
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -107,7 +116,7 @@ func BookList(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 
-	d := BookRepo().FinAll()
+	d := Bookrepo.FinAll()
 
 	resp, _ := json.Marshal(d)
 	w.Write(resp)
@@ -121,7 +130,7 @@ func BookListById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 
-	d := BookRepo().FindBookById(id)
+	d := Bookrepo.FindBookById(id)
 
 	resp, _ := json.Marshal(d)
 	w.Write(resp)
@@ -135,7 +144,7 @@ func BookListByAuthorOrBookId(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 
-	d := BookRepo().FindByAuthorOrBookId(id)
+	d := Bookrepo.FindByAuthorOrBookId(id)
 
 	resp, _ := json.Marshal(d)
 	w.Write(resp)
@@ -143,53 +152,94 @@ func BookListByAuthorOrBookId(w http.ResponseWriter, r *http.Request) {
 
 func BookListByName(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
+	//vars := mux.Vars(r)
+	param := r.URL.Query().Get("name")
 	// id, _ := strconv.Atoi(vars["name"])
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 
-	d := BookRepo().FindByName(vars["name"])
+	d := Bookrepo.FindByName(param)
+
+	resp, _ := json.Marshal(d)
+	if len(resp) != 0 {
+		w.Write([]byte(httpErrors.NotFound.Error()))
+	}
+	w.Write(resp)
+}
+
+func BookBeforeDelete(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
+
+	d := Bookrepo.BeforeDelete(id)
 
 	resp, _ := json.Marshal(d)
 	w.Write(resp)
 }
 
-type User struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+func BookListWithAuthors(w http.ResponseWriter, r *http.Request) {
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
+
+	d := Authorrepo.GetAllAuthorsWithBookInformation()
+
+	resp, _ := json.Marshal(d)
+
+	w.Write([]byte(resp))
+}
+
+func BookListByAuthorWithName(w http.ResponseWriter, r *http.Request) {
+
+	//vars := mux.Vars(r)
+	param := r.URL.Query().Get("name")
+	// id, _ := strconv.Atoi(vars["name"])
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
+
+	d := Authorrepo.GetAuthorWithName(param)
+
+	resp, _ := json.Marshal(d)
+
+	w.Write([]byte(resp))
 }
 
 // type errorsResponse struct {
 // 	message string `json:"message"`
 // }
 
-func userCreate(w http.ResponseWriter, r *http.Request) {
-	var u User
+// func userCreate(w http.ResponseWriter, r *http.Request) {
+// 	var u User
 
-	if r.Header.Get("Content-Type") != "application/json" {
-		err := httpErrors.ParseErrors(httpErrors.NotAllowedImageHeader)
-		w.Write([]byte(err.Error()))
-		return
-	}
+// 	if r.Header.Get("Content-Type") != "application/json" {
+// 		err := httpErrors.ParseErrors(httpErrors.NotAllowedImageHeader)
+// 		w.Write([]byte(err.Error()))
+// 		return
+// 	}
 
-	err := json.NewDecoder(r.Body).Decode(&u)
-	if err != nil {
-		w.Write([]byte(httpErrors.
-			ParseErrors(httpErrors.BadRequest).
-			Error()))
-		return
-	}
+// 	err := json.NewDecoder(r.Body).Decode(&u)
+// 	if err != nil {
+// 		w.Write([]byte(httpErrors.
+// 			ParseErrors(httpErrors.BadRequest).
+// 			Error()))
+// 		return
+// 	}
 
-	personData, err := json.Marshal(u)
-	if err != nil {
-		w.Write([]byte(httpErrors.
-			ParseErrors(httpErrors.BadRequest).
-			Error()))
-		return
-	}
-	w.Write(personData)
-}
+// 	personData, err := json.Marshal(u)
+// 	if err != nil {
+// 		w.Write([]byte(httpErrors.
+// 			ParseErrors(httpErrors.BadRequest).
+// 			Error()))
+// 		return
+// 	}
+// 	w.Write(personData)
+// }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +253,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 func authenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
-		if strings.HasPrefix(r.URL.Path, "/products/") {
+		if strings.HasPrefix(r.URL.Path, "/book/") {
 			if token != "" {
 				next.ServeHTTP(w, r)
 			} else {
